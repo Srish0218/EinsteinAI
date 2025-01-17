@@ -1,8 +1,15 @@
 import streamlit as st
 import google.generativeai as genai
 
+# Configure the page (tab name and icon)
+st.set_page_config(
+    page_title="EinsteinAI - Physics Assistant",  # Tab name
+    page_icon="🔬",  # Tab icon (you can use emojis or upload your own favicon)
+)
+
 # Get API key from Streamlit secrets, Configure the Gemini model with your API key
 api_key = st.secrets["GEMINI_API_KEY"]
+genai.configure(api_key=api_key)
 genai_model = genai.GenerativeModel('gemini-1.5-flash')
 
 # Initialize chat history
@@ -30,10 +37,13 @@ if user_input := st.chat_input("Type your physics question here..."):
         with st.spinner("Thinking..."):
             try:
                 # Formulate the prompt
+                linkedin_link = "https://www.linkedin.com/in/srishti-jaitly-6852b822b/"
                 prompt = f"""
-                You are a highly knowledgeable physics assistant. Only answer questions related to physics. 
-                If the question is not about physics, respond with:
-                "I can only answer physics-related questions. Please ask me something related to physics."
+                You are EinsteinAI, a physics assistant created by Srishti Jaitly. 
+                Your purpose is to answer questions related to physics only. 
+                If the question is not related to physics, respond with:
+                "I am EinsteinAI, a physics assistant created by Srishti Jaitly {linkedin_link}. 
+                I am made to answer questions related to physics only. Please ask me something related to physics."
 
                 Question: {user_input}
                 """
