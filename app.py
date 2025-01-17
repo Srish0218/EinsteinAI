@@ -1,9 +1,8 @@
 import streamlit as st
 import google.generativeai as genai
-from config import API_KEY
 
-# Configure the Gemini model with your API key
-genai.configure(api_key=API_KEY)
+# Get API key from Streamlit secrets, Configure the Gemini model with your API key
+api_key = st.secrets["GEMINI_API_KEY"]
 genai_model = genai.GenerativeModel('gemini-1.5-flash')
 
 # Initialize chat history
