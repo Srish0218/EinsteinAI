@@ -1,8 +1,6 @@
-import streamlit as st
-import mysql.connector
-from mysql.connector import Error
 import pymysql
-from main_app import app
+import streamlit as st
+from mysql.connector import Error
 
 # Use pymysql as MySQLdb
 pymysql.install_as_MySQLdb()
