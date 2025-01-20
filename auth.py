@@ -1,7 +1,6 @@
 import streamlit as st
 import pymysql
 from mysql.connector import Error
-from bcrypt import hashpw, gensalt, checkpw
 
 # Use pymysql as MySQLdb
 pymysql.install_as_MySQLdb()
