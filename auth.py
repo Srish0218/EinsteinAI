@@ -1,6 +1,7 @@
 import streamlit as st
 import pymysql
 from mysql.connector import Error
+from bcrypt import hashpw, gensalt, checkpw
 
 # Use pymysql as MySQLdb
 pymysql.install_as_MySQLdb()
@@ -22,16 +23,15 @@ DB_NAME = st.secrets["DB_NAME"]
 # Function to check if the username/email already exists in the database
 def user_exists(username: str, email: str) -> bool:
     try:
-        conn = MySQLdb.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME
-        )
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE username = %s OR email = %s", (username, email))
-        result = cursor.fetchone()
-        conn.close()
+        with MySQLdb.connect(
+                host=DB_HOST,
+                user=DB_USER,
+                password=DB_PASSWORD,
+                database=DB_NAME
+        ) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM users WHERE username = %s OR email = %s", (username, email))
+                result = cursor.fetchone()
         return result is not None
     except Error as e:
         st.error(f"Database error: {e}")
@@ -40,38 +40,37 @@ def user_exists(username: str, email: str) -> bool:
 # Function to insert a new user into the database
 def register_user(username: str, email: str, password: str):
     try:
-        conn = MySQLdb.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME
-        )
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
-            (username, email, password)  # Store the plain text password
-        )
-        conn.commit()
-        conn.close()
+        with MySQLdb.connect(
+                host=DB_HOST,
+                user=DB_USER,
+                password=DB_PASSWORD,
+                database=DB_NAME
+        ) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
+                    (username, email, password)  # Store the plain text password
+                )
+                conn.commit()
         st.success("User registered successfully!")
     except Error as e:
         st.error(f"Database error: {e}")
 
+
 # Function to authenticate user login
 def authenticate_user(username: str, password: str) -> bool:
     try:
-        conn = MySQLdb.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME
-        )
-        cursor = conn.cursor()
-        cursor.execute("SELECT password FROM users WHERE username = %s", (username,))
-        result = cursor.fetchone()
-        conn.close()
+        with MySQLdb.connect(
+                host=DB_HOST,
+                user=DB_USER,
+                password=DB_PASSWORD,
+                database=DB_NAME
+        ) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT password FROM users WHERE username = %s", (username,))
+                result = cursor.fetchone()
 
-        # Compare the password directly (plain text comparison)
+        # Direct comparison for plain-text password
         if result and result[0] == password:
             # Store username in session state
             st.session_state.loggedin_username = username
@@ -80,6 +79,7 @@ def authenticate_user(username: str, password: str) -> bool:
     except Error as e:
         st.error(f"Database error: {e}")
         return False
+
 
 # Login page logic
 def login():
@@ -96,9 +96,11 @@ def login():
 
     st.markdown("---")
     st.markdown("Don't have an account?")
-    if st.button("Sign Up", key="show_signup"):
-        # Switch to the signup form
+
+    # Use a different key for state toggling
+    if st.button("Switch to Signup", key="switch_to_signup"):
         st.session_state.show_signup = True
+
 
 # Signup page logic
 def signup():
@@ -114,10 +116,12 @@ def signup():
         elif user_exists(username, email):
             st.error("Username or email already exists.")
         else:
-            register_user(username, email, password)  # Store plain text password
+            register_user(username, email, password)
 
     st.markdown("---")
     st.markdown("Already have an account?")
-    if st.button("Back to Login", key="back_to_login"):
-        # Switch back to the login form
+
+    # Use a different key for state toggling
+    if st.button("Back to Login", key="back_to_login_button"):
         st.session_state.show_signup = False
+
