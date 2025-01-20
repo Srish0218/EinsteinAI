@@ -7,9 +7,7 @@ genai.configure(api_key=api_key)
 genai_model = genai.GenerativeModel('gemini-1.5-flash')
 
 
-
-
-def app(loggedin_username):
+def app():
     st.markdown(
         """
         <style>
@@ -63,7 +61,6 @@ def app(loggedin_username):
                 {"role": "assistant",
                  "content": f"Welcome, Guest!! I'm EinsteinAI, your physics assistant. Ask me anything related to physics!"}
             ]
-
 
     # Display chat history
     st.divider()
