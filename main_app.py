@@ -1,41 +1,32 @@
 import streamlit as st
 import google.generativeai as genai
+from logout_after_login import logout
 
 # Configure API key
 api_key = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=api_key)
 genai_model = genai.GenerativeModel('gemini-1.5-flash')
 
-
 def app():
     st.markdown(
         """
         <style>
-.fixed-header {
-    position: fixed;
-    text-align: center;
-    background: rgba(14,17,23,0.5); /* Semi-transparent dark gray */
-    backdrop-filter: blur(10px); /* Frosted glass blur effect */
-    -webkit-backdrop-filter: blur(10px); /* Frosted glass blur for Safari */
-    border-radius: 10px; /* Rounded corners */
-    top: 20px;
-    left: 0;
-    width: 100%;
-    color: white; /* White text for contrast */
-    padding: 15px 10px;
-    z-index: 1000;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
-}
+        .fixed-header {
+            position: fixed;
+            text-align: center;
+            background: rgba(14,17,23,0.5); /* Semi-transparent dark gray */
+            backdrop-filter: blur(10px); /* Frosted glass blur effect */
+            -webkit-backdrop-filter: blur(10px); /* Frosted glass blur for Safari */
+            border-radius: 10px; /* Rounded corners */
+            top: 20px;
+            left: 0;
+            width: 100%;
+            color: white; /* White text for contrast */
+            padding: 15px 10px;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
+        }
 
-
-
-        .fixed-subtitle {
-        color: grey;
-        margin-top: 5px;
-    }
-    .main-content {
-        margin-top: 10px;  /* Adjusted for both title and subtitle */
-    }
         .fixed-footer {
             position: fixed;
             bottom: 0;
@@ -106,12 +97,11 @@ def app():
                     st.error(f"{error_message} (Error: {e})")
                     st.session_state.messages.append({"role": "assistant", "content": error_message})
 
-    # Fixed footer with contact info or additional links
-    st.markdown(
-        """
-        <div class="fixed-footer">
-    <p>&copy; 2025 EinsteinAI. All rights reserved. Created by <a href="https://www.linkedin.com/in/srishti-jaitly-6852b822b/" class="footer-link" target="_blank">Srishti Jaitly</a> Explore more at <a href="https://github.com/Srish0218" class="footer-link" target="_blank">GitHub</a> | <a href="mailto:srishtijaitly2002@gmail.com" class="footer-link" target="_blank">Send Email</a></p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    # Sidebar with logout option
+    if st.session_state.logged_in:
+        with st.sidebar:
+            st.markdown(f"### Welcome, {st.session_state.loggedin_username}!")
+            if st.button("Logout"):
+                st.session_state.logged_in = False
+                st.session_state.loggedin_username = None
+                logout()  # Call logout function

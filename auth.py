@@ -1,10 +1,6 @@
 import streamlit as st
 import pymysql
-from mysql.connector import Error
-
-# Use pymysql as MySQLdb
-pymysql.install_as_MySQLdb()
-import MySQLdb
+from pymysql.err import MySQLError
 
 # Configure the page (tab name and icon)
 st.set_page_config(
@@ -22,48 +18,45 @@ DB_NAME = st.secrets["DB_NAME"]
 # Function to check if the username/email already exists in the database
 def user_exists(username: str, email: str) -> bool:
     try:
-        conn = MySQLdb.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, database=DB_NAME)
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE username = %s OR email = %s", (username, email))
-        result = cursor.fetchone()
-        cursor.close()
+        conn = pymysql.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, database=DB_NAME)
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM users WHERE username = %s OR email = %s", (username, email))
+            result = cursor.fetchone()
         conn.close()
         return result is not None
-    except Error as e:
+    except MySQLError as e:
         st.error(f"Database error: {e}")
         return False
 
 # Function to insert a new user into the database
 def register_user(username: str, email: str, password: str):
     try:
-        conn = MySQLdb.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, database=DB_NAME)
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
-            (username, email, password)  # Store plain text password for now
-        )
-        conn.commit()
-        cursor.close()
+        conn = pymysql.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, database=DB_NAME)
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
+                (username, email, password)  # Store plain text password for now
+            )
+            conn.commit()
         conn.close()
         st.success("User registered successfully!")
-    except Error as e:
+    except MySQLError as e:
         st.error(f"Database error: {e}")
 
 # Function to authenticate user login
 def authenticate_user(username: str, password: str) -> bool:
     try:
-        conn = MySQLdb.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, database=DB_NAME)
-        cursor = conn.cursor()
-        cursor.execute("SELECT password FROM users WHERE username = %s", (username,))
-        result = cursor.fetchone()
-        cursor.close()
+        conn = pymysql.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, database=DB_NAME)
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT password FROM users WHERE username = %s", (username,))
+            result = cursor.fetchone()
         conn.close()
 
         if result and result[0] == password:  # Plain text comparison
             st.session_state.loggedin_username = username
             return True
         return False
-    except Error as e:
+    except MySQLError as e:
         st.error(f"Database error: {e}")
         return False
 
@@ -105,57 +98,3 @@ def signup():
     st.markdown("Already have an account?")
     if st.button("Back to Login", key="back_to_login_button"):
         st.session_state.show_signup = False
-
-# Ensure the logged-in state and username exist
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-if "loggedin_username" not in st.session_state:
-    st.session_state.loggedin_username = None
-
-# Check if the user is logged in
-if st.session_state.logged_in:
-    # Inject CSS for top-right positioning
-    st.markdown("""
-    <style>
-        .top-right-container {
-            position: relative;
-            top: 80px;
-            right: 90%;
-            background: rgba(14,17,23,0.5); /* Semi-transparent dark gray */
-    backdrop-filter: blur(10px); /* Frosted glass blur effect */
-    -webkit-backdrop-filter: blur(10px); /* Frosted glass blur for Safari */
-    border-radius: 10px; /* Rounded corners */
-            padding: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            text-align: right;
-        }
-        .top-right-container p {
-            margin: 0;
-            font-size: 15px;
-            color: white;
-            
-        }
-        .top-right-container .logout-button {
-            margin-top: 10px;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # Display the welcome message and Streamlit button
-    st.markdown(
-        f"""
-        <div class="top-right-container">
-            <p>Welcome, {st.session_state.loggedin_username}!</p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # Logout button (placed after the styled section for correct placement)
-    logout = st.button("Logout", key="logout", help="Click to log out", args=(True,))
-
-    # Handle logout action
-    if logout:
-        st.session_state.logged_in = False
-        st.session_state.loggedin_username = None
-        st.rerun()
