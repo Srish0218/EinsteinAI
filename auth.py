@@ -18,7 +18,7 @@ DB_NAME = st.secrets["DB_NAME"]
 # Function to check if the username/email already exists in the database
 def user_exists(username: str, email: str) -> bool:
     try:
-        conn = pymysql.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, database=DB_NAME)
+        conn = pymysql.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, database=DB_NAME,port=3306)
         with conn.cursor() as cursor:
             cursor.execute("SELECT * FROM users WHERE username = %s OR email = %s", (username, email))
             result = cursor.fetchone()
@@ -31,7 +31,7 @@ def user_exists(username: str, email: str) -> bool:
 # Function to insert a new user into the database
 def register_user(username: str, email: str, password: str):
     try:
-        conn = pymysql.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, database=DB_NAME)
+        conn = pymysql.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, database=DB_NAME,port=3306)
         with conn.cursor() as cursor:
             cursor.execute(
                 "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
@@ -46,7 +46,7 @@ def register_user(username: str, email: str, password: str):
 # Function to authenticate user login
 def authenticate_user(username: str, password: str) -> bool:
     try:
-        conn = pymysql.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, database=DB_NAME)
+        conn = pymysql.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, database=DB_NAME, port=3306)
         with conn.cursor() as cursor:
             cursor.execute("SELECT password FROM users WHERE username = %s", (username,))
             result = cursor.fetchone()
