@@ -11,17 +11,24 @@ def app():
     st.markdown(
         """
         <style>
-        .fixed-header {
-            position: fixed;
-            text-align: center;
-            background-color: black;
-            top: 20px;
-            left: 0;
-            width: 100%;
-            color: white;
-            padding: 15px 10px;
-            z-index: 1000;
-        }
+.fixed-header {
+    position: fixed;
+    text-align: center;
+    background: rgba(14,17,23,0.5); /* Semi-transparent dark gray */
+    backdrop-filter: blur(10px); /* Frosted glass blur effect */
+    -webkit-backdrop-filter: blur(10px); /* Frosted glass blur for Safari */
+    border-radius: 10px; /* Rounded corners */
+    top: 20px;
+    left: 0;
+    width: 100%;
+    color: white; /* White text for contrast */
+    padding: 15px 10px;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
+}
+
+
+
         .fixed-subtitle {
         color: grey;
         margin-top: 5px;
@@ -34,7 +41,7 @@ def app():
             bottom: 0;
             left: 0;
             width: 100%;
-            background-color: #1a1a1a;
+            background-color: rgba(14,17,23,0.5);
             color: white;
             text-align: center;
             padding: 1px;
